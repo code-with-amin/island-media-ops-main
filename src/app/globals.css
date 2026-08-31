@@ -1,0 +1,118 @@
+@import 'tailwindcss';
+
+/**
+ * Island Media Co — the whole visual system.
+ *
+ * Every colour, type step and radius used across management, field and portal
+ * is declared once, here. The three interfaces differ in density and layout,
+ * never in palette or type. This file is the answer to "what keeps three
+ * interfaces inexpensive to maintain six months later".
+ *
+ * One rule shapes the palette: in this product, colour is data. Availability
+ * has to encode booked, held, out of service and free, so those hues are
+ * reserved. The brand accent is therefore deliberately a petrol teal that
+ * appears only on interactive affordances, where it cannot be mistaken for a
+ * state.
+ */
+@theme {
+  /* Brand. Used for links, focus and primary actions. Nothing else. */
+  --color-brand-50: #eef7f6;
+  --color-brand-100: #d2ebe8;
+  --color-brand-200: #a6d7d1;
+  --color-brand-300: #6bb9b2;
+  --color-brand-400: #3a978f;
+  --color-brand-500: #1d7a73;
+  --color-brand-600: #12615c;
+  --color-brand-700: #114e4a;
+  --color-brand-800: #113f3d;
+  --color-brand-900: #0e3230;
+
+  /* Ink. Text, chrome and dividers. */
+  --color-ink-50: #f6f7f8;
+  --color-ink-100: #eceef1;
+  --color-ink-200: #dbdfe4;
+  --color-ink-300: #bcc3cc;
+  --color-ink-400: #8e98a5;
+  --color-ink-500: #6b7683;
+  --color-ink-600: #525c68;
+  --color-ink-700: #414a55;
+  --color-ink-800: #333b44;
+  --color-ink-900: #171c22;
+
+  /* State. Applied because a record IS in that state, never for decoration. */
+  --color-positive: #1c6b45;
+  --color-positive-soft: #e6f3ec;
+  --color-caution: #9a5b0c;
+  --color-caution-soft: #fbf1e3;
+  --color-critical: #a52c22;
+  --color-critical-soft: #fbeceb;
+  --color-info: #14509c;
+  --color-info-soft: #e9f0fa;
+
+  /* Inventory encoding, for the availability strip. Distinct from the state
+     colours above so a blocked segment never reads as a form error. */
+  --color-free: #58a97f;
+  --color-booked: #3f6ea8;
+  --color-held: #c08a2e;
+  --color-outage: #a8564a;
+  --color-retired: #9aa3ad;
+
+  --color-canvas: #f5f6f6;
+  --color-surface: #ffffff;
+
+  /* One superfamily. Plex Sans for everything read as language, Plex Mono for
+     everything read as data: dates, asset identifiers, capacity, money. */
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, 'SF Mono', monospace;
+
+  --radius-chip: 0.25rem;
+  --radius-control: 0.375rem;
+  --radius-card: 0.5rem;
+}
+
+@layer base {
+  html {
+    background: var(--color-canvas);
+  }
+
+  body {
+    color: var(--color-ink-900);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Figures in tables and money columns must align vertically. */
+  table,
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* An eyebrow marks the kind of record you are looking at. It is the same
+     device in all three interfaces, which is most of what makes them feel
+     like one system. */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-ink-500);
+  }
+}

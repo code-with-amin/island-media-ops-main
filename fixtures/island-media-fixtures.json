@@ -1,0 +1,789 @@
+{
+  "schemaVersion": "1.0",
+  "fixtureClock": "2027-01-15T09:00:00Z",
+  "currency": "GBP",
+  "dateInterval": "[startDate, endDate)",
+  "mediaOwners": [
+    {
+      "id": "owner-island-transit",
+      "name": "Island Transit"
+    },
+    {
+      "id": "owner-harbourlink",
+      "name": "HarbourLink"
+    },
+    {
+      "id": "owner-parcelfleet",
+      "name": "ParcelFleet"
+    },
+    {
+      "id": "owner-chargego",
+      "name": "ChargeGo"
+    }
+  ],
+  "locations": [
+    {
+      "id": "loc-islandwide",
+      "name": "Islandwide routes"
+    },
+    {
+      "id": "loc-central-hub",
+      "name": "Central transport hub"
+    },
+    {
+      "id": "loc-east",
+      "name": "East district"
+    },
+    {
+      "id": "loc-west",
+      "name": "West district"
+    }
+  ],
+  "products": [
+    {
+      "id": "product-bus-rear",
+      "name": "Bus rear panel",
+      "mediaOwnerId": "owner-island-transit",
+      "mediaType": "vehicle",
+      "locationIds": [
+        "loc-islandwide"
+      ],
+      "allocationModel": "exclusive_asset",
+      "description": "A rear advertising panel on one named route bus.",
+      "indicativeRate": {
+        "currency": "GBP",
+        "amount": 950,
+        "unit": "month",
+        "monthlyEquivalent": 950,
+        "label": "From £950 per month"
+      },
+      "minimumTermDays": 30,
+      "creativeSpec": {
+        "format": "PDF or EPS",
+        "widthMm": 1850,
+        "heightMm": 620,
+        "notes": "Allow 25 mm bleed. Outline fonts."
+      }
+    },
+    {
+      "id": "product-bus-wrap",
+      "name": "Bus full wrap",
+      "mediaOwnerId": "owner-island-transit",
+      "mediaType": "vehicle",
+      "locationIds": [
+        "loc-islandwide"
+      ],
+      "allocationModel": "exclusive_asset",
+      "description": "A full exterior wrap on one named bus.",
+      "indicativeRate": {
+        "currency": "GBP",
+        "amount": 2800,
+        "unit": "month",
+        "monthlyEquivalent": 2800,
+        "label": "From £2,800 per month"
+      },
+      "minimumTermDays": 90,
+      "creativeSpec": {
+        "format": "EPS",
+        "notes": "Vehicle template supplied after operator review."
+      }
+    },
+    {
+      "id": "product-hub-screen",
+      "name": "Hub portrait screen network",
+      "mediaOwnerId": "owner-harbourlink",
+      "mediaType": "digital_screen",
+      "locationIds": [
+        "loc-central-hub"
+      ],
+      "allocationModel": "capacity_pool",
+      "capacityPoolId": "pool-hub-screen",
+      "description": "A 15-second advert shown across a portrait screen network.",
+      "indicativeRate": {
+        "currency": "GBP",
+        "amount": 600,
+        "unit": "2_weeks",
+        "monthlyEquivalent": 1300,
+        "label": "From £600 per 2 weeks"
+      },
+      "minimumTermDays": 14,
+      "creativeSpec": {
+        "format": "MP4 or JPG",
+        "widthPx": 1080,
+        "heightPx": 1920,
+        "durationSeconds": 15
+      }
+    },
+    {
+      "id": "product-hub-door",
+      "name": "Hub door panels",
+      "mediaOwnerId": "owner-harbourlink",
+      "mediaType": "static_site",
+      "locationIds": [
+        "loc-central-hub"
+      ],
+      "allocationModel": "exclusive_asset",
+      "description": "A set of printed panels on one named transport-hub door.",
+      "indicativeRate": {
+        "currency": "GBP",
+        "amount": 1200,
+        "unit": "month",
+        "monthlyEquivalent": 1200,
+        "label": "From £1,200 per month"
+      },
+      "minimumTermDays": 90,
+      "creativeSpec": {
+        "format": "PDF or EPS",
+        "notes": "Template contains seven panel dimensions."
+      }
+    },
+    {
+      "id": "product-van-rear",
+      "name": "Delivery van rear",
+      "mediaOwnerId": "owner-parcelfleet",
+      "mediaType": "vehicle",
+      "locationIds": [
+        "loc-east",
+        "loc-west"
+      ],
+      "allocationModel": "exclusive_asset",
+      "description": "A printed rear panel on one named delivery van.",
+      "indicativeRate": {
+        "currency": "GBP",
+        "amount": 450,
+        "unit": "month",
+        "monthlyEquivalent": 450,
+        "label": "From £450 per month"
+      },
+      "minimumTermDays": 180,
+      "creativeSpec": {
+        "format": "PDF or EPS",
+        "widthMm": 1305,
+        "heightMm": 445
+      }
+    },
+    {
+      "id": "product-ev-screen",
+      "name": "Charging-station screen",
+      "mediaOwnerId": "owner-chargego",
+      "mediaType": "digital_screen",
+      "locationIds": [
+        "loc-east",
+        "loc-west"
+      ],
+      "allocationModel": "exclusive_asset",
+      "description": "A digital placement on one charging-station display.",
+      "indicativeRate": {
+        "currency": "GBP",
+        "amount": null,
+        "unit": null,
+        "monthlyEquivalent": null,
+        "label": "Price on request"
+      },
+      "minimumTermDays": 30,
+      "creativeSpec": null
+    }
+  ],
+  "assets": [
+    {
+      "id": "asset-bus-101-rear",
+      "productId": "product-bus-rear",
+      "name": "Bus 101 rear",
+      "locationId": "loc-islandwide",
+      "status": "active",
+      "verifiedAt": "2027-01-14T12:00:00Z",
+      "verificationSource": "operator export"
+    },
+    {
+      "id": "asset-bus-102-rear",
+      "productId": "product-bus-rear",
+      "name": "Bus 102 rear",
+      "locationId": "loc-islandwide",
+      "status": "active",
+      "verifiedAt": "2027-01-14T12:00:00Z",
+      "verificationSource": "operator export"
+    },
+    {
+      "id": "asset-bus-103-rear",
+      "productId": "product-bus-rear",
+      "name": "Bus 103 rear",
+      "locationId": "loc-islandwide",
+      "status": "active",
+      "verifiedAt": "2027-01-14T12:00:00Z",
+      "verificationSource": "operator export"
+    },
+    {
+      "id": "asset-bus-201-wrap",
+      "productId": "product-bus-wrap",
+      "name": "Bus 201 full wrap",
+      "locationId": "loc-islandwide",
+      "status": "active",
+      "verifiedAt": "2027-01-12T09:30:00Z",
+      "verificationSource": "operator export"
+    },
+    {
+      "id": "asset-bus-202-wrap",
+      "productId": "product-bus-wrap",
+      "name": "Bus 202 full wrap",
+      "locationId": "loc-islandwide",
+      "status": "retired",
+      "verifiedAt": "2026-12-20T09:30:00Z",
+      "verificationSource": "owner email"
+    },
+    {
+      "id": "asset-door-a",
+      "productId": "product-hub-door",
+      "name": "Hub door A",
+      "locationId": "loc-central-hub",
+      "status": "active",
+      "verifiedAt": "2027-01-13T11:00:00Z",
+      "verificationSource": "owner portal"
+    },
+    {
+      "id": "asset-door-b",
+      "productId": "product-hub-door",
+      "name": "Hub door B",
+      "locationId": "loc-central-hub",
+      "status": "active",
+      "verifiedAt": "2026-10-01T11:00:00Z",
+      "verificationSource": "spreadsheet import",
+      "note": "Owner confirmation recommended before approval."
+    },
+    {
+      "id": "asset-van-12",
+      "productId": "product-van-rear",
+      "name": "Van 12 rear",
+      "locationId": "loc-east",
+      "status": "active",
+      "verifiedAt": "2027-01-10T15:00:00Z",
+      "verificationSource": "operator export"
+    },
+    {
+      "id": "asset-van-14",
+      "productId": "product-van-rear",
+      "name": "Van 14 rear",
+      "locationId": "loc-west",
+      "status": "active",
+      "verifiedAt": "2027-01-10T15:00:00Z",
+      "verificationSource": "operator export"
+    },
+    {
+      "id": "asset-van-18",
+      "productId": "product-van-rear",
+      "name": "Van 18 rear",
+      "locationId": "loc-east",
+      "status": "active",
+      "verifiedAt": "2027-01-10T15:00:00Z",
+      "verificationSource": "operator export"
+    },
+    {
+      "id": "asset-ev-screen-01",
+      "productId": "product-ev-screen",
+      "name": "ChargeGo East 01",
+      "locationId": "loc-east",
+      "status": "active",
+      "verifiedAt": "2027-01-05T09:00:00Z",
+      "verificationSource": "owner email"
+    },
+    {
+      "id": "asset-ev-screen-02",
+      "productId": "product-ev-screen",
+      "name": "ChargeGo West 02",
+      "locationId": "loc-west",
+      "status": "active",
+      "verifiedAt": "2026-09-01T09:00:00Z",
+      "verificationSource": "spreadsheet import"
+    }
+  ],
+  "capacityPools": [
+    {
+      "id": "pool-hub-screen",
+      "productId": "product-hub-screen",
+      "name": "Hub screen loop capacity",
+      "locationId": "loc-central-hub",
+      "capacity": 4,
+      "status": "active",
+      "verifiedAt": "2027-01-14T08:00:00Z",
+      "verificationSource": "scheduler export"
+    }
+  ],
+  "bookings": [
+    {
+      "id": "booking-001",
+      "campaignName": "Northstar launch",
+      "productId": "product-bus-rear",
+      "assetId": "asset-bus-101-rear",
+      "startDate": "2027-02-01",
+      "endDate": "2027-03-01",
+      "status": "confirmed"
+    },
+    {
+      "id": "booking-002",
+      "campaignName": "Pine & Co recruitment",
+      "productId": "product-bus-rear",
+      "assetId": "asset-bus-102-rear",
+      "startDate": "2027-02-15",
+      "endDate": "2027-04-01",
+      "status": "confirmed"
+    },
+    {
+      "id": "booking-003",
+      "campaignName": "Harbour Bank awareness",
+      "productId": "product-bus-wrap",
+      "assetId": "asset-bus-201-wrap",
+      "startDate": "2027-01-01",
+      "endDate": "2027-07-01",
+      "status": "confirmed"
+    },
+    {
+      "id": "booking-004",
+      "campaignName": "Orchid winter offer",
+      "productId": "product-hub-door",
+      "assetId": "asset-door-a",
+      "startDate": "2027-03-01",
+      "endDate": "2027-06-01",
+      "status": "confirmed"
+    },
+    {
+      "id": "booking-005",
+      "campaignName": "Oak Legal campaign",
+      "productId": "product-van-rear",
+      "assetId": "asset-van-12",
+      "startDate": "2027-01-01",
+      "endDate": "2027-07-01",
+      "status": "confirmed"
+    },
+    {
+      "id": "booking-006",
+      "campaignName": "Bluewater events",
+      "productId": "product-hub-screen",
+      "capacityPoolId": "pool-hub-screen",
+      "capacityUnits": 1,
+      "startDate": "2027-02-01",
+      "endDate": "2027-03-01",
+      "status": "confirmed"
+    },
+    {
+      "id": "booking-007",
+      "campaignName": "Maple health month",
+      "productId": "product-hub-screen",
+      "capacityPoolId": "pool-hub-screen",
+      "capacityUnits": 1,
+      "startDate": "2027-02-15",
+      "endDate": "2027-03-15",
+      "status": "confirmed"
+    },
+    {
+      "id": "booking-008",
+      "campaignName": "Cobalt weekend sale",
+      "productId": "product-hub-screen",
+      "capacityPoolId": "pool-hub-screen",
+      "capacityUnits": 1,
+      "startDate": "2027-02-20",
+      "endDate": "2027-02-28",
+      "status": "confirmed"
+    }
+  ],
+  "holds": [
+    {
+      "id": "hold-001",
+      "productId": "product-hub-screen",
+      "capacityPoolId": "pool-hub-screen",
+      "capacityUnits": 1,
+      "startDate": "2027-02-10",
+      "endDate": "2027-03-01",
+      "expiresAt": "2027-01-20T17:00:00Z",
+      "status": "active"
+    },
+    {
+      "id": "hold-002",
+      "productId": "product-hub-screen",
+      "capacityPoolId": "pool-hub-screen",
+      "capacityUnits": 1,
+      "startDate": "2027-02-10",
+      "endDate": "2027-03-01",
+      "expiresAt": "2027-01-10T17:00:00Z",
+      "status": "active"
+    },
+    {
+      "id": "hold-003",
+      "productId": "product-bus-rear",
+      "assetId": "asset-bus-103-rear",
+      "startDate": "2027-03-05",
+      "endDate": "2027-03-15",
+      "expiresAt": "2027-01-18T12:00:00Z",
+      "status": "active"
+    }
+  ],
+  "outages": [
+    {
+      "id": "outage-001",
+      "assetId": "asset-bus-103-rear",
+      "startDate": "2027-02-10",
+      "endDate": "2027-02-20",
+      "reason": "Scheduled maintenance",
+      "status": "confirmed"
+    },
+    {
+      "id": "outage-002",
+      "assetId": "asset-van-18",
+      "startDate": "2027-03-01",
+      "endDate": "2027-03-08",
+      "reason": "Vehicle inspection",
+      "status": "confirmed"
+    }
+  ],
+  "bookingRequests": [
+    {
+      "id": "request-001",
+      "idempotencyKey": "seed-request-001",
+      "advertiser": {
+        "name": "Silverline Fitness",
+        "contactName": "Avery Stone",
+        "email": "avery@example.test"
+      },
+      "productId": "product-bus-rear",
+      "requestedAssetId": null,
+      "startDate": "2027-02-12",
+      "endDate": "2027-02-18",
+      "budget": 1100,
+      "objective": "Promote a new membership offer",
+      "notes": "Would prefer islandwide coverage.",
+      "status": "submitted",
+      "createdAt": "2027-01-15T08:30:00Z",
+      "history": [
+        {
+          "at": "2027-01-15T08:30:00Z",
+          "actor": "advertiser",
+          "action": "submitted",
+          "note": null
+        }
+      ],
+      "organisationId": "org-silverline"
+    },
+    {
+      "id": "request-002",
+      "idempotencyKey": "seed-request-002",
+      "advertiser": {
+        "name": "Lighthouse Learning",
+        "contactName": "Jordan Ellis",
+        "email": "jordan@example.test"
+      },
+      "productId": "product-hub-door",
+      "requestedAssetId": "asset-door-b",
+      "startDate": "2027-02-01",
+      "endDate": "2027-05-01",
+      "budget": 4000,
+      "objective": "Recruit students for spring courses",
+      "notes": "Creative is not ready yet.",
+      "status": "approved",
+      "createdAt": "2027-01-14T14:00:00Z",
+      "history": [
+        {
+          "at": "2027-01-14T14:00:00Z",
+          "actor": "client",
+          "action": "submitted",
+          "note": null
+        },
+        {
+          "at": "2027-01-15T08:00:00Z",
+          "actor": "manager",
+          "action": "information_required",
+          "note": "Please confirm when artwork will be available."
+        },
+        {
+          "at": "2027-01-15T08:20:00Z",
+          "actor": "client",
+          "action": "information_supplied",
+          "note": "Artwork will be ready by 22 January."
+        },
+        {
+          "at": "2027-01-15T08:35:00Z",
+          "actor": "manager",
+          "action": "approved",
+          "note": "Proceed using Hub door B, subject to contract acceptance."
+        }
+      ],
+      "organisationId": "org-lighthouse"
+    }
+  ],
+  "users": [
+    {
+      "id": "user-manager-01",
+      "name": "Morgan Reed",
+      "email": "manager@example.test",
+      "role": "manager",
+      "organisationId": null,
+      "status": "active"
+    },
+    {
+      "id": "user-fitter-01",
+      "name": "Casey Morgan",
+      "email": "fitter@example.test",
+      "role": "fitter",
+      "organisationId": null,
+      "status": "active"
+    },
+    {
+      "id": "user-client-silverline",
+      "name": "Avery Stone",
+      "email": "avery@example.test",
+      "role": "client",
+      "organisationId": "org-silverline",
+      "status": "active"
+    },
+    {
+      "id": "user-client-lighthouse",
+      "name": "Jordan Ellis",
+      "email": "jordan@example.test",
+      "role": "client",
+      "organisationId": "org-lighthouse",
+      "status": "active"
+    },
+    {
+      "id": "user-client-oaklegal",
+      "name": "Taylor Quinn",
+      "email": "taylor@example.test",
+      "role": "client",
+      "organisationId": "org-oak-legal",
+      "status": "active"
+    }
+  ],
+  "organisations": [
+    {
+      "id": "org-silverline",
+      "name": "Silverline Fitness",
+      "createdAt": "2027-01-15T08:25:00Z",
+      "contractCount": 0
+    },
+    {
+      "id": "org-lighthouse",
+      "name": "Lighthouse Learning",
+      "createdAt": "2026-12-15T10:00:00Z",
+      "contractCount": 1
+    },
+    {
+      "id": "org-oak-legal",
+      "name": "Oak Legal",
+      "createdAt": "2026-10-01T09:00:00Z",
+      "contractCount": 1
+    }
+  ],
+  "contracts": [
+    {
+      "id": "contract-001",
+      "organisationId": "org-lighthouse",
+      "bookingRequestId": "request-002",
+      "status": "issued",
+      "version": 1,
+      "startDate": "2027-02-01",
+      "endDate": "2027-05-01",
+      "currency": "GBP",
+      "total": 3600,
+      "issuedAt": "2027-01-15T08:40:00Z",
+      "acceptedAt": null,
+      "activatedAt": null,
+      "items": [
+        {
+          "id": "contract-item-001",
+          "productId": "product-hub-door",
+          "assetId": "asset-door-b",
+          "quantity": 1,
+          "unitRate": 1200,
+          "rateUnit": "month",
+          "lineTotal": 3600
+        }
+      ],
+      "history": [
+        {
+          "at": "2027-01-15T08:36:00Z",
+          "actor": "manager",
+          "action": "draft_created",
+          "note": null
+        },
+        {
+          "at": "2027-01-15T08:40:00Z",
+          "actor": "manager",
+          "action": "issued",
+          "note": "Issued for client review."
+        }
+      ]
+    },
+    {
+      "id": "contract-002",
+      "organisationId": "org-oak-legal",
+      "bookingRequestId": null,
+      "status": "active",
+      "version": 2,
+      "startDate": "2027-01-01",
+      "endDate": "2027-07-01",
+      "currency": "GBP",
+      "total": 2700,
+      "issuedAt": "2026-12-18T10:00:00Z",
+      "acceptedAt": "2026-12-20T11:00:00Z",
+      "activatedAt": "2027-01-01T00:00:00Z",
+      "items": [
+        {
+          "id": "contract-item-002",
+          "productId": "product-van-rear",
+          "assetId": "asset-van-12",
+          "quantity": 1,
+          "unitRate": 450,
+          "rateUnit": "month",
+          "lineTotal": 2700
+        }
+      ],
+      "history": [
+        {
+          "at": "2026-12-18T10:00:00Z",
+          "actor": "manager",
+          "action": "issued",
+          "note": null
+        },
+        {
+          "at": "2026-12-20T11:00:00Z",
+          "actor": "client",
+          "action": "accepted",
+          "note": null
+        },
+        {
+          "at": "2027-01-01T00:00:00Z",
+          "actor": "system",
+          "action": "activated",
+          "note": null
+        }
+      ]
+    }
+  ],
+  "campaigns": [
+    {
+      "id": "campaign-001",
+      "organisationId": "org-lighthouse",
+      "contractId": "contract-001",
+      "bookingId": null,
+      "name": "Lighthouse spring recruitment",
+      "status": "awaiting_contract_acceptance",
+      "currentStage": "contract_issued",
+      "clientVisible": true
+    },
+    {
+      "id": "campaign-002",
+      "organisationId": "org-oak-legal",
+      "contractId": "contract-002",
+      "bookingId": "booking-005",
+      "name": "Oak Legal delivery-van campaign",
+      "status": "active",
+      "currentStage": "installation_scheduled",
+      "clientVisible": true
+    }
+  ],
+  "workOrders": [
+    {
+      "id": "work-order-001",
+      "campaignId": "campaign-002",
+      "contractId": "contract-002",
+      "organisationId": "org-oak-legal",
+      "type": "installation",
+      "status": "assigned",
+      "assignedUserId": "user-fitter-01",
+      "assetId": "asset-van-12",
+      "scheduledStart": "2027-01-16T08:30:00Z",
+      "scheduledEnd": "2027-01-16T11:30:00Z",
+      "locationLabel": "ParcelFleet East depot",
+      "instructions": "Fit approved rear panel. Photograph the finished panel and asset identifier.",
+      "internalNotes": "Depot contact details are available to the assigned fitter only.",
+      "completionNote": null,
+      "proofRecordIds": [],
+      "history": [
+        {
+          "at": "2027-01-12T10:00:00Z",
+          "actor": "manager",
+          "action": "assigned",
+          "note": "Assigned to Casey Morgan."
+        }
+      ]
+    }
+  ],
+  "serviceEvents": [
+    {
+      "id": "event-001",
+      "organisationId": "org-oak-legal",
+      "contractId": "contract-002",
+      "campaignId": "campaign-002",
+      "workOrderId": null,
+      "at": "2026-12-20T11:00:00Z",
+      "type": "contract_accepted",
+      "title": "Contract accepted",
+      "clientVisible": true,
+      "clientSummary": "Your advertising contract has been accepted."
+    },
+    {
+      "id": "event-002",
+      "organisationId": "org-oak-legal",
+      "contractId": "contract-002",
+      "campaignId": "campaign-002",
+      "workOrderId": null,
+      "at": "2027-01-05T14:00:00Z",
+      "type": "artwork_received",
+      "title": "Artwork received",
+      "clientVisible": true,
+      "clientSummary": "Your artwork has been received for review."
+    },
+    {
+      "id": "event-003",
+      "organisationId": "org-oak-legal",
+      "contractId": "contract-002",
+      "campaignId": "campaign-002",
+      "workOrderId": null,
+      "at": "2027-01-08T15:30:00Z",
+      "type": "artwork_approved",
+      "title": "Artwork approved",
+      "clientVisible": true,
+      "clientSummary": "Your artwork is approved for production."
+    },
+    {
+      "id": "event-004",
+      "organisationId": "org-oak-legal",
+      "contractId": "contract-002",
+      "campaignId": "campaign-002",
+      "workOrderId": "work-order-001",
+      "at": "2027-01-12T10:00:00Z",
+      "type": "installation_scheduled",
+      "title": "Installation scheduled",
+      "clientVisible": true,
+      "clientSummary": "Installation is planned for 16 January."
+    },
+    {
+      "id": "event-005",
+      "organisationId": "org-lighthouse",
+      "contractId": "contract-001",
+      "campaignId": "campaign-001",
+      "workOrderId": null,
+      "at": "2027-01-15T08:40:00Z",
+      "type": "contract_issued",
+      "title": "Contract ready for review",
+      "clientVisible": true,
+      "clientSummary": "Your contract is ready to review."
+    }
+  ],
+  "clientRequests": [
+    {
+      "id": "client-request-001",
+      "organisationId": "org-oak-legal",
+      "contractId": "contract-002",
+      "type": "contract_change",
+      "status": "submitted",
+      "createdAt": "2027-01-14T09:00:00Z",
+      "summary": "Please confirm whether installation can start after 09:00.",
+      "history": [
+        {
+          "at": "2027-01-14T09:00:00Z",
+          "actor": "client",
+          "action": "submitted",
+          "note": null
+        }
+      ]
+    }
+  ],
+  "proofRecords": []
+}

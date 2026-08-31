@@ -1,0 +1,430 @@
+// Island Media Co — prototype schema.
+//
+// Two conventions worth knowing before reading:
+//
+// 1. Calendar dates (startDate / endDate) are stored as "YYYY-MM-DD" STRINGS,
+//    not DateTime. ISO strings compare and sort correctly, and this removes an
+//    entire class of timezone-drift bug. Instants (createdAt, expiresAt,
+//    scheduledStart) remain DateTime and are always UTC.
+//
+// 2. SQLite has no native enum. Status and type columns are Strings, with the
+//    permitted values defined as TypeScript unions in src/domain. The domain
+//    layer owns the state machines; the database stores their output.
+
+generator client {
+  provider        = "prisma-client-js"
+  // Lets the deployed preview talk to Turso (hosted libSQL) through a driver
+  // adapter while local development stays a plain SQLite file.
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------- inventory
+
+model MediaOwner {
+  id       String    @id
+  name     String
+  products Product[]
+}
+
+model Location {
+  id       String            @id
+  name     String
+  products ProductLocation[]
+  assets   Asset[]
+  pools    CapacityPool[]
+}
+
+/// What is sold. Distinct from the physical asset that delivers it.
+model Product {
+  id              String  @id
+  name            String
+  mediaOwnerId    String
+  mediaType       String // vehicle | digital_screen | static_site
+  allocationModel String // exclusive_asset | capacity_pool
+  description     String
+  minimumTermDays Int
+
+  // Rate is flattened rather than nested. A null amount means "Price on
+  // request"; a null monthlyEquivalent means the product has no comparable
+  // monthly figure and must be excluded from a budget filter, never treated
+  // as zero.
+  rateCurrency          String?
+  rateAmount            Float?
+  rateUnit              String?
+  rateMonthlyEquivalent Float?
+  rateLabel             String
+
+  creativeSpec String? // JSON blob; shape varies per media type
+
+  mediaOwner      MediaOwner        @relation(fields: [mediaOwnerId], references: [id])
+  locations       ProductLocation[]
+  assets          Asset[]
+  capacityPools   CapacityPool[]
+  bookings        Booking[]
+  holds           Hold[]
+  bookingRequests BookingRequest[]
+  contractItems   ContractItem[]
+  shortlistItems  ShortlistItem[]
+}
+
+model ProductLocation {
+  productId  String
+  locationId String
+
+  product  Product  @relation(fields: [productId], references: [id])
+  location Location @relation(fields: [locationId], references: [id])
+
+  @@id([productId, locationId])
+}
+
+/// A named physical thing: a bus panel, a door, a screen, a van.
+model Asset {
+  id                 String    @id
+  productId          String
+  name               String
+  locationId         String
+  status             String // active | retired
+  verifiedAt         DateTime?
+  verificationSource String?
+  note               String?
+
+  product    Product     @relation(fields: [productId], references: [id])
+  location   Location    @relation(fields: [locationId], references: [id])
+  bookings   Booking[]
+  holds      Hold[]
+  outages    Outage[]
+  workOrders WorkOrder[]
+
+  @@index([productId])
+}
+
+/// Shared capacity, such as a digital advertising loop.
+model CapacityPool {
+  id                 String    @id
+  productId          String
+  name               String
+  locationId         String
+  capacity           Int
+  status             String
+  verifiedAt         DateTime?
+  verificationSource String?
+
+  product  Product   @relation(fields: [productId], references: [id])
+  location Location  @relation(fields: [locationId], references: [id])
+  bookings Booking[]
+  holds    Hold[]
+}
+
+// ------------------------------------------------------- inventory pressure
+
+/// Consumed inventory. Only `confirmed` bookings block availability.
+model Booking {
+  id             String  @id
+  campaignName   String?
+  productId      String
+  assetId        String?
+  capacityPoolId String?
+  capacityUnits  Int?
+  startDate      String
+  endDate        String
+  status         String // confirmed | cancelled
+
+  product      Product       @relation(fields: [productId], references: [id])
+  asset        Asset?        @relation(fields: [assetId], references: [id])
+  capacityPool CapacityPool? @relation(fields: [capacityPoolId], references: [id])
+  campaigns    Campaign[]
+
+  @@index([productId, startDate, endDate])
+}
+
+/// A soft block. Blocks inventory ONLY while expiresAt is later than the
+/// fixture clock. An expired hold is inert but is not deleted.
+model Hold {
+  id             String   @id
+  productId      String
+  assetId        String?
+  capacityPoolId String?
+  capacityUnits  Int?
+  startDate      String
+  endDate        String
+  expiresAt      DateTime
+  status         String // active | released
+
+  product      Product       @relation(fields: [productId], references: [id])
+  asset        Asset?        @relation(fields: [assetId], references: [id])
+  capacityPool CapacityPool? @relation(fields: [capacityPoolId], references: [id])
+
+  @@index([productId, startDate, endDate])
+}
+
+/// Asset unavailable for operational reasons. Only `confirmed` outages block.
+model Outage {
+  id        String @id
+  assetId   String
+  startDate String
+  endDate   String
+  reason    String
+  status    String // confirmed | provisional
+
+  asset Asset @relation(fields: [assetId], references: [id])
+
+  @@index([assetId, startDate, endDate])
+}
+
+// ----------------------------------------------------------- people, tenants
+
+/// The client tenant. Every client-facing query is scoped to one of these.
+model Organisation {
+  id        String   @id
+  name      String
+  createdAt DateTime
+
+  users           User[]
+  bookingRequests BookingRequest[]
+  contracts       Contract[]
+  campaigns       Campaign[]
+  workOrders      WorkOrder[]
+  serviceEvents   ServiceEvent[]
+  clientRequests  ClientRequest[]
+  shortlistItems  ShortlistItem[]
+}
+
+model User {
+  id             String  @id
+  name           String
+  email          String  @unique
+  role           String // manager | fitter | client
+  organisationId String? // null for staff
+  status         String
+
+  organisation    Organisation? @relation(fields: [organisationId], references: [id])
+  assignedWork    WorkOrder[]
+  capturedProofs  ProofRecord[]
+}
+
+// ------------------------------------------------------- demand and contract
+
+/// A non-binding enquiry. Never implies approval.
+model BookingRequest {
+  id             String  @id
+  idempotencyKey String?
+  organisationId String?
+
+  advertiserName        String
+  advertiserContactName String
+  advertiserEmail       String
+
+  productId       String
+  requestedAssetId String?
+  startDate       String
+  endDate         String
+  budget          Float?
+  objective       String?
+  notes           String?
+  status          String // submitted | information_required | approved | declined
+  createdAt       DateTime
+
+  product      Product       @relation(fields: [productId], references: [id])
+  organisation Organisation? @relation(fields: [organisationId], references: [id])
+  contracts    Contract[]
+
+  @@index([status])
+}
+
+model Contract {
+  id               String  @id
+  organisationId   String
+  bookingRequestId String?
+  status           String // draft | issued | change_requested | accepted | active | completed | cancelled
+  version          Int     @default(1)
+  startDate        String
+  endDate          String
+  currency         String
+  total            Float
+
+  createdAt   DateTime
+  issuedAt    DateTime?
+  acceptedAt  DateTime?
+  activatedAt DateTime?
+
+  organisation   Organisation    @relation(fields: [organisationId], references: [id])
+  bookingRequest BookingRequest? @relation(fields: [bookingRequestId], references: [id])
+  items          ContractItem[]
+  campaigns      Campaign[]
+  workOrders     WorkOrder[]
+  serviceEvents  ServiceEvent[]
+  clientRequests ClientRequest[]
+
+  @@index([organisationId, status])
+}
+
+model ContractItem {
+  id         String @id
+  contractId String
+  productId  String
+  assetId    String?
+  quantity   Int
+  unitRate   Float
+  rateUnit   String
+  lineTotal  Float
+
+  contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id])
+}
+
+/// Delivery of an accepted contract. Distinct from both contract and booking.
+model Campaign {
+  id             String  @id
+  organisationId String
+  contractId     String
+  bookingId      String?
+  name           String
+  status         String
+  currentStage   String
+  clientVisible  Boolean @default(true)
+
+  organisation  Organisation   @relation(fields: [organisationId], references: [id])
+  contract      Contract       @relation(fields: [contractId], references: [id])
+  booking       Booking?       @relation(fields: [bookingId], references: [id])
+  workOrders    WorkOrder[]
+  serviceEvents ServiceEvent[]
+}
+
+// ------------------------------------------------------------- field work
+
+model WorkOrder {
+  id             String @id
+  campaignId     String
+  contractId     String
+  organisationId String
+  type           String // installation | removal | maintenance
+  status         String // draft | assigned | travelling | on_site | blocked | completed
+  assignedUserId String?
+  assetId        String?
+
+  scheduledStart DateTime
+  scheduledEnd   DateTime
+  locationLabel  String
+  instructions   String
+
+  /// Never serialised to a client-facing response.
+  internalNotes  String?
+
+  completionNote String?
+  blockedReason  String?
+  createdAt      DateTime
+
+  campaign      Campaign       @relation(fields: [campaignId], references: [id])
+  contract      Contract       @relation(fields: [contractId], references: [id])
+  organisation  Organisation   @relation(fields: [organisationId], references: [id])
+  assignedUser  User?          @relation(fields: [assignedUserId], references: [id])
+  asset         Asset?         @relation(fields: [assetId], references: [id])
+  proofRecords  ProofRecord[]
+  serviceEvents ServiceEvent[]
+
+  @@index([assignedUserId, status])
+}
+
+/// Proof of completion. Prototype stores a size-capped base64 data URL;
+/// production would store an object key with signed access. See README.
+model ProofRecord {
+  id              String   @id
+  workOrderId     String
+  kind            String // image | document
+  fileName        String
+  mimeType        String
+  sizeBytes       Int
+  dataUrl         String
+  capturedAt      DateTime
+  capturedByUserId String?
+
+  workOrder  WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  capturedBy User?     @relation(fields: [capturedByUserId], references: [id])
+}
+
+// ------------------------------------------------- client-visible narrative
+
+/// A safe summary of verified operational state. `clientSummary` is what the
+/// client sees; internal titles and notes stay in HistoryEvent.
+model ServiceEvent {
+  id             String   @id
+  organisationId String
+  contractId     String?
+  campaignId     String?
+  workOrderId    String?
+  at             DateTime
+  type           String
+  title          String
+  clientVisible  Boolean  @default(true)
+  clientSummary  String?
+
+  organisation Organisation @relation(fields: [organisationId], references: [id])
+  contract     Contract?    @relation(fields: [contractId], references: [id])
+  campaign     Campaign?    @relation(fields: [campaignId], references: [id])
+  workOrder    WorkOrder?   @relation(fields: [workOrderId], references: [id])
+
+  @@index([organisationId, at])
+}
+
+/// A client-raised change or cancellation. Stays pending until management
+/// changes the underlying state.
+model ClientRequest {
+  id             String   @id
+  organisationId String
+  contractId     String?
+  type           String // contract_change | cancellation
+  status         String // submitted | under_review | accepted | declined
+  createdAt      DateTime
+  summary        String
+
+  organisation Organisation @relation(fields: [organisationId], references: [id])
+  contract     Contract?    @relation(fields: [contractId], references: [id])
+}
+
+model ShortlistItem {
+  id             String   @id
+  organisationId String
+  productId      String
+  startDate      String?
+  endDate        String?
+  createdAt      DateTime
+
+  organisation Organisation @relation(fields: [organisationId], references: [id])
+  product      Product      @relation(fields: [productId], references: [id])
+
+  @@unique([organisationId, productId])
+}
+
+// ------------------------------------------------------------- audit, infra
+
+/// One audit table for every entity that records material change, so the
+/// "history with actor, time, action and note" rule is enforced in one place
+/// rather than duplicated across six models.
+model HistoryEvent {
+  id         String   @id @default(cuid())
+  entityType String // booking_request | contract | work_order | client_request
+  entityId   String
+  at         DateTime
+  actor      String // manager | client | fitter | advertiser | system
+  action     String
+  note       String?
+
+  @@index([entityType, entityId, at])
+}
+
+/// Makes repeated material creates safe. A repeated (scope, key) returns the
+/// record already created rather than creating a second one.
+model IdempotencyRecord {
+  id        String   @id @default(cuid())
+  scope     String
+  key       String
+  entityId  String
+  createdAt DateTime
+
+  @@unique([scope, key])
+}

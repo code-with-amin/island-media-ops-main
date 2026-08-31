@@ -1,0 +1,1140 @@
+openapi: 3.1.0
+info:
+  title: Island Media Co connected assessment API
+  version: 2.0.0
+  description: >-
+    Fictional mock boundary for the Frameworks technical assessment. Protected
+    prototype endpoints use X-Prototype-User-Id to represent the selected
+    seeded or newly registered user. Production authentication is outside scope.
+servers:
+  - url: /api
+paths:
+  /auth/register:
+    post:
+      summary: Register a new fictional client user and organisation
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterInput'
+      responses:
+        '201':
+          description: Client account and organisation created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '200':
+          description: Existing result returned for a repeated idempotency key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /session/switch:
+    post:
+      summary: Switch to a seeded prototype user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId]
+              properties:
+                userId:
+                  type: string
+      responses:
+        '200':
+          description: Prototype session selected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /products:
+    get:
+      summary: Search the public product catalogue for requested dates
+      parameters:
+        - in: query
+          name: startDate
+          required: true
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: endDate
+          required: true
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: mediaType
+          schema:
+            type: string
+        - in: query
+          name: locationId
+          schema:
+            type: string
+        - in: query
+          name: maxMonthlyBudget
+          schema:
+            type: number
+            minimum: 0
+      responses:
+        '200':
+          description: Matching products with calculated availability
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items, query]
+                properties:
+                  query:
+                    $ref: '#/components/schemas/ProductSearchQuery'
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ProductSearchResult'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /products/{productId}:
+    get:
+      summary: Get one product with availability detail
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: startDate
+          required: true
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: endDate
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Product detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetail'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /booking-requests:
+    post:
+      summary: Submit a non-binding advertising request
+      parameters:
+        - $ref: '#/components/parameters/PrototypeUserId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingRequestCreate'
+      responses:
+        '201':
+          description: New request created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingRequest'
+        '200':
+          description: Existing request returned for a repeated key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /client/summary:
+    get:
+      summary: Get the client portal home for the selected organisation
+      parameters:
+        - $ref: '#/components/parameters/PrototypeUserId'
+      responses:
+        '200':
+          description: Client account, actions, contracts and service summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientSummary'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /client/contracts:
+    get:
+      summary: List contracts for the selected client organisation
+      parameters:
+        - $ref: '#/components/parameters/PrototypeUserId'
+      responses:
+        '200':
+          description: Organisation-scoped contracts
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ContractSummary'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /client/contracts/{contractId}:
+    get:
+      summary: Get one organisation-scoped contract and service timeline
+      parameters:
+        - $ref: '#/components/parameters/PrototypeUserId'
+        - in: path
+          name: contractId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Contract detail, campaign, client-visible events and proof
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientContractDetail'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /client/contracts/{contractId}/actions:
+    post:
+      summary: Accept a prototype contract or submit a client request
+      parameters:
+        - $ref: '#/components/parameters/PrototypeUserId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - in: path
+          name: contractId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientContractAction'
+      responses:
+        '200':
+          description: Updated contract or client request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientContractDetail'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /management/dashboard:
+    get:
+      summary: Get management attention counts and recent work
+      parameters:
+        - $ref: '#/components/parameters/PrototypeUserId'
+      responses:
+        '200':
+          description: Management dashboard
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementDashboard'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /management/booking-requests:
+    get:
+      summary: List requests for management review
+      parameters:
+        - $ref: '#/components/parameters/PrototypeUserId'
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [submitted, information_required, approved, declined]
+      responses:
+        '200':
+          description: Request list
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BookingRequestSummary'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /management/booking-requests/{requestId}:
+    get:
+      summary: Get a request with client and current availability
+      parameters:
+        - $ref: '#/components/parameters/PrototypeUserId'
+        - in: path
+          name: requestId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Management request detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingRequestDetail'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      summary: Apply a management decision to a request
+      parameters:
+        - $ref: '#/components/parameters/PrototypeUserId'
+        - in: path
+          name: requestId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManagementDecision'
+      responses:
+        '200':
+          description: Updated request, optionally with draft contract ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingRequestDetail'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /management/contracts:
+    post:
+      summary: Create a draft contract from an approved request
+      parameters:
+        - $ref: '#/components/parameters/PrototypeUserId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContractCreate'
+      responses:
+        '201':
+          description: Draft contract created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contract'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /management/contracts/{contractId}/issue:
+    post:
+      summary: Issue a draft contract to its client
+      parameters:
+        - $ref: '#/components/parameters/PrototypeUserId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - in: path
+          name: contractId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Contract issued and client-visible event created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contract'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /management/work-orders:
+    post:
+      summary: Create and assign a campaign work order
+      parameters:
+        - $ref: '#/components/parameters/PrototypeUserId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkOrderCreate'
+      responses:
+        '201':
+          description: Work order created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkOrder'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /mobile/work-orders:
+    get:
+      summary: List work orders assigned to the selected fitter
+      parameters:
+        - $ref: '#/components/parameters/PrototypeUserId'
+        - in: query
+          name: status
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Assigned mobile work orders
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WorkOrder'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /mobile/work-orders/{workOrderId}:
+    get:
+      summary: Get one assigned work order
+      parameters:
+        - $ref: '#/components/parameters/PrototypeUserId'
+        - in: path
+          name: workOrderId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Mobile-safe work-order detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkOrder'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /mobile/work-orders/{workOrderId}/status:
+    post:
+      summary: Update fitter progress or report a blocker
+      parameters:
+        - $ref: '#/components/parameters/PrototypeUserId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - in: path
+          name: workOrderId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkOrderStatusUpdate'
+      responses:
+        '200':
+          description: Updated work order and history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkOrder'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /mobile/work-orders/{workOrderId}/proof:
+    post:
+      summary: Attach prototype completion proof
+      parameters:
+        - $ref: '#/components/parameters/PrototypeUserId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - in: path
+          name: workOrderId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file, completionNote]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                completionNote:
+                  type: string
+                  minLength: 3
+      responses:
+        '201':
+          description: Proof record created and service history updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProofRecord'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /dev/reset:
+    post:
+      summary: Optional helper to restore the supplied fixture state
+      responses:
+        '204':
+          description: Fixture state restored
+components:
+  parameters:
+    PrototypeUserId:
+      in: header
+      name: X-Prototype-User-Id
+      required: true
+      schema:
+        type: string
+    IdempotencyKey:
+      in: header
+      name: Idempotency-Key
+      required: true
+      schema:
+        type: string
+        minLength: 8
+  schemas:
+    RegisterInput:
+      type: object
+      required: [organisationName, contactName, email]
+      properties:
+        organisationName:
+          type: string
+          minLength: 2
+        contactName:
+          type: string
+          minLength: 2
+        email:
+          type: string
+          format: email
+    Session:
+      type: object
+      required: [user, organisation]
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        organisation:
+          oneOf:
+            - $ref: '#/components/schemas/Organisation'
+            - type: 'null'
+    User:
+      type: object
+      required: [id, name, email, role, status]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [client, manager, fitter]
+        organisationId:
+          type: [string, 'null']
+        status:
+          type: string
+    Organisation:
+      type: object
+      required: [id, name, createdAt]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        contractCount:
+          type: integer
+          minimum: 0
+    ProductSearchQuery:
+      type: object
+      required: [startDate, endDate]
+      properties:
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        mediaType:
+          type: [string, 'null']
+        locationId:
+          type: [string, 'null']
+        maxMonthlyBudget:
+          type: [number, 'null']
+    IndicativeRate:
+      type: object
+      required: [currency, label]
+      properties:
+        currency:
+          type: string
+          const: GBP
+        amount:
+          type: [number, 'null']
+        unit:
+          type: [string, 'null']
+        monthlyEquivalent:
+          type: [number, 'null']
+        label:
+          type: string
+    AvailabilitySummary:
+      type: object
+      required: [state, reason, calculatedAt]
+      properties:
+        state:
+          type: string
+          enum: [available, unavailable, confirmation_required]
+        reason:
+          type: string
+        calculatedAt:
+          type: string
+          format: date-time
+        availableAssetCount:
+          type: [integer, 'null']
+        availableCapacity:
+          type: [integer, 'null']
+        totalCapacity:
+          type: [integer, 'null']
+        freshestVerificationAt:
+          type: [string, 'null']
+          format: date-time
+    ProductSearchResult:
+      type: object
+      required: [id, name, mediaOwnerName, mediaType, locationNames, allocationModel, indicativeRate, minimumTermDays, availability]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        mediaOwnerName:
+          type: string
+        mediaType:
+          type: string
+        locationNames:
+          type: array
+          items:
+            type: string
+        allocationModel:
+          type: string
+          enum: [exclusive_asset, capacity_pool]
+        indicativeRate:
+          $ref: '#/components/schemas/IndicativeRate'
+        minimumTermDays:
+          type: integer
+        availability:
+          $ref: '#/components/schemas/AvailabilitySummary'
+    ProductDetail:
+      allOf:
+        - $ref: '#/components/schemas/ProductSearchResult'
+        - type: object
+          required: [description, creativeSpec, assetOptions]
+          properties:
+            description:
+              type: string
+            creativeSpec:
+              type: [object, 'null']
+              additionalProperties: true
+            assetOptions:
+              type: array
+              items:
+                $ref: '#/components/schemas/AssetOption'
+    AssetOption:
+      type: object
+      required: [id, name, status, availability]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+        verifiedAt:
+          type: [string, 'null']
+          format: date-time
+        verificationSource:
+          type: [string, 'null']
+        note:
+          type: [string, 'null']
+        availability:
+          $ref: '#/components/schemas/AvailabilitySummary'
+    BookingRequestCreate:
+      type: object
+      required: [productId, startDate, endDate, budget, objective]
+      properties:
+        productId:
+          type: string
+        requestedAssetId:
+          type: [string, 'null']
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        budget:
+          type: number
+          minimum: 0
+        objective:
+          type: string
+          minLength: 5
+        notes:
+          type: [string, 'null']
+    HistoryEntry:
+      type: object
+      required: [at, actor, action]
+      properties:
+        at:
+          type: string
+          format: date-time
+        actor:
+          type: string
+        action:
+          type: string
+        note:
+          type: [string, 'null']
+    BookingRequest:
+      allOf:
+        - $ref: '#/components/schemas/BookingRequestCreate'
+        - type: object
+          required: [id, organisationId, status, createdAt, history]
+          properties:
+            id:
+              type: string
+            organisationId:
+              type: string
+            status:
+              type: string
+              enum: [submitted, information_required, approved, declined]
+            createdAt:
+              type: string
+              format: date-time
+            draftContractId:
+              type: [string, 'null']
+            history:
+              type: array
+              items:
+                $ref: '#/components/schemas/HistoryEntry'
+    BookingRequestSummary:
+      type: object
+      required: [id, organisationName, productName, startDate, endDate, status, createdAt]
+      properties:
+        id:
+          type: string
+        organisationName:
+          type: string
+        productName:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        attentionReason:
+          type: [string, 'null']
+    BookingRequestDetail:
+      allOf:
+        - $ref: '#/components/schemas/BookingRequest'
+        - type: object
+          required: [organisation, product, currentAvailability]
+          properties:
+            organisation:
+              $ref: '#/components/schemas/Organisation'
+            product:
+              $ref: '#/components/schemas/ProductSearchResult'
+            currentAvailability:
+              $ref: '#/components/schemas/AvailabilitySummary'
+    ManagementDecision:
+      type: object
+      required: [action]
+      properties:
+        action:
+          type: string
+          enum: [request_information, approve, decline]
+        note:
+          type: [string, 'null']
+        selectedAssetId:
+          type: [string, 'null']
+    ContractItem:
+      type: object
+      required: [id, productId, quantity, lineTotal]
+      properties:
+        id:
+          type: string
+        productId:
+          type: string
+        assetId:
+          type: [string, 'null']
+        capacityPoolId:
+          type: [string, 'null']
+        quantity:
+          type: integer
+        unitRate:
+          type: [number, 'null']
+        rateUnit:
+          type: [string, 'null']
+        lineTotal:
+          type: number
+    ContractCreate:
+      type: object
+      required: [organisationId, bookingRequestId, startDate, endDate, items, total]
+      properties:
+        organisationId:
+          type: string
+        bookingRequestId:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ContractItem'
+        total:
+          type: number
+          minimum: 0
+    Contract:
+      type: object
+      required: [id, organisationId, status, version, startDate, endDate, currency, total, items, history]
+      properties:
+        id:
+          type: string
+        organisationId:
+          type: string
+        bookingRequestId:
+          type: [string, 'null']
+        status:
+          type: string
+          enum: [draft, issued, change_requested, accepted, active, completed, cancelled]
+        version:
+          type: integer
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        currency:
+          type: string
+          const: GBP
+        total:
+          type: number
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContractItem'
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/HistoryEntry'
+    ContractSummary:
+      type: object
+      required: [id, status, startDate, endDate, total, actionRequired]
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        total:
+          type: number
+        actionRequired:
+          type: [string, 'null']
+    ClientContractAction:
+      type: object
+      required: [action]
+      properties:
+        action:
+          type: string
+          enum: [accept, request_changes, request_cancellation]
+        note:
+          type: [string, 'null']
+    ServiceEvent:
+      type: object
+      required: [id, at, type, title, clientVisible]
+      properties:
+        id:
+          type: string
+        at:
+          type: string
+          format: date-time
+        type:
+          type: string
+        title:
+          type: string
+        clientVisible:
+          type: boolean
+        clientSummary:
+          type: [string, 'null']
+    ProofRecord:
+      type: object
+      required: [id, workOrderId, fileName, createdAt, createdByUserId]
+      properties:
+        id:
+          type: string
+        workOrderId:
+          type: string
+        fileName:
+          type: string
+        previewUrl:
+          type: [string, 'null']
+        completionNote:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        createdByUserId:
+          type: string
+    ClientContractDetail:
+      allOf:
+        - $ref: '#/components/schemas/Contract'
+        - type: object
+          required: [campaign, serviceEvents, proofRecords, clientRequests]
+          properties:
+            campaign:
+              type: [object, 'null']
+              additionalProperties: true
+            serviceEvents:
+              type: array
+              items:
+                $ref: '#/components/schemas/ServiceEvent'
+            proofRecords:
+              type: array
+              items:
+                $ref: '#/components/schemas/ProofRecord'
+            clientRequests:
+              type: array
+              items:
+                type: object
+                additionalProperties: true
+    ClientSummary:
+      type: object
+      required: [organisation, contracts, attentionItems, recentServiceEvents]
+      properties:
+        organisation:
+          $ref: '#/components/schemas/Organisation'
+        contracts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContractSummary'
+        attentionItems:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        recentServiceEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceEvent'
+    WorkOrderCreate:
+      type: object
+      required: [campaignId, contractId, type, assignedUserId, assetId, scheduledStart, scheduledEnd, locationLabel, instructions]
+      properties:
+        campaignId:
+          type: string
+        contractId:
+          type: string
+        type:
+          type: string
+          enum: [survey, production, installation, maintenance, removal]
+        assignedUserId:
+          type: string
+        assetId:
+          type: string
+        scheduledStart:
+          type: string
+          format: date-time
+        scheduledEnd:
+          type: string
+          format: date-time
+        locationLabel:
+          type: string
+        instructions:
+          type: string
+    WorkOrder:
+      type: object
+      required: [id, campaignId, contractId, organisationId, type, status, assignedUserId, assetId, scheduledStart, scheduledEnd, locationLabel, instructions, history, proofRecordIds]
+      properties:
+        id:
+          type: string
+        campaignId:
+          type: string
+        contractId:
+          type: string
+        organisationId:
+          type: string
+        type:
+          type: string
+        status:
+          type: string
+          enum: [draft, assigned, travelling, on_site, blocked, completed]
+        assignedUserId:
+          type: string
+        assetId:
+          type: string
+        scheduledStart:
+          type: string
+          format: date-time
+        scheduledEnd:
+          type: string
+          format: date-time
+        locationLabel:
+          type: string
+        instructions:
+          type: string
+        completionNote:
+          type: [string, 'null']
+        proofRecordIds:
+          type: array
+          items:
+            type: string
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/HistoryEntry'
+    WorkOrderStatusUpdate:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [assigned, travelling, on_site, blocked, completed]
+        note:
+          type: [string, 'null']
+    ManagementDashboard:
+      type: object
+      required: [attentionItems, counts, upcomingWorkOrders]
+      properties:
+        attentionItems:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        counts:
+          type: object
+          additionalProperties:
+            type: integer
+        upcomingWorkOrders:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkOrder'
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: [object, 'null']
+          additionalProperties: true
+  responses:
+    ValidationError:
+      description: Request validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Record not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: The selected prototype user cannot access this record or action
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: FORBIDDEN
+            message: You cannot access this organisation's record.
+    Conflict:
+      description: State or availability changed before the action completed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: INVENTORY_CONFLICT
+            message: No suitable inventory remains for the requested dates.
+    ServiceUnavailable:
+      description: Simulated or real temporary service failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: SERVICE_UNAVAILABLE
+            message: Please try again. The service is temporarily unavailable.
